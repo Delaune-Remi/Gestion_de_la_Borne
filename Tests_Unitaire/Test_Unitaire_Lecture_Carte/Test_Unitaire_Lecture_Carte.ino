@@ -20,6 +20,6 @@ void loop() {
 
 /*
  *        Valeurs donnees :
- * 1 = pas de carte a puce detecte
- * 0 = carte a puce detecte
+ * 1 = pas de carte a puce detecter
+ * 0 = carte a puce detecter
  */
