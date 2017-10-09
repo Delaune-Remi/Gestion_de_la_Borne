@@ -22,4 +22,5 @@ void loop() {
  * 96 : Aucune Voiture detecter
  * 32 : Voiture detecter sur Aval
  * 64 : Voiture detecter sur Amont
- */
+ * 00 : Voiture detecter sur Aval et Amont
+ */ 
