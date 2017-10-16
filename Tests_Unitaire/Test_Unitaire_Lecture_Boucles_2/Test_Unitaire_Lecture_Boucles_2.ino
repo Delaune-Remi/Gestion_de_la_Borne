@@ -7,14 +7,20 @@ void setup() {
 }
 
 void loop() {
-  int val;
+  int boucleAmont,boucleAval;
   Serial.begin(9600); // Initialisation de la vitesse du moniteur serie
   Wire.beginTransmission(0x20); // Permet l'initialisation de la communication avec l'adresse de la barriere 
   Wire.requestFrom(0x20,1); // Permet de faire une requete pour lire les 1 premier octet a l'adresse 0x20 
-  val=Wire.read();
-  val&= 0x60;
-  Serial.print(val);  // Permet d'afficher sur le moniteur serie
-  while ( val == 32){
+  boucleAmont=Wire.read();
+  boucleAval=boucleAmont;
+  boucleAval&=0x40;
+  boucleAmont&= 0x20;
+  Serial.print("Boucle Amont: ");  // Permet d'afficher sur le moniteur serie
+  Serial.println(boucleAmont);
+  Serial.print("Boucle Aval: ");
+  Serial.println(boucleAval);
+  
+  while ( boucleAmont == 0 || boucleAval == 0 ){
     
       Wire.beginTransmission(0x20); // Permet l'initialisation de la communication avec l'adresse de la barriere 
       Wire.write(0xFD); // Permet d'ouvrir la barriere
@@ -25,8 +31,10 @@ void loop() {
        Wire.endTransmission();
        Wire.beginTransmission(0x20); // Permet l'initialisation de la communication avec l'adresse de la barriere 
        Wire.requestFrom(0x20,1); // Permet de faire une requete pour lire les 1 premier octet a l'adresse 0x20 
-       val=Wire.read();
-       val&= 0x60;
+       boucleAmont=Wire.read();
+       boucleAval=boucleAmont;
+       boucleAval&= 0x40;
+       boucleAmont&= 0x20;
   }
   Wire.beginTransmission(0x20); // Permet l'initialisation de la communication avec l'adresse de la barriere 
   Wire.write(0xFE); // Permet d'ouvrir la barriere

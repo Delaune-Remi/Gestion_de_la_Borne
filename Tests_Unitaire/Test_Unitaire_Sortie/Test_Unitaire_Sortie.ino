@@ -7,7 +7,7 @@ int boucleAval;
 int nbVoiture=0;
 
 void setup() {
-  initI2C(120);
+  initI2C(200);
   Serial.begin(9600);
 }
 
@@ -16,11 +16,15 @@ void loop() {
   Wire.requestFrom(0x20,2);
   boucle=Wire.read();
   boucle&=0x60;
+  Wire.requestFrom(0x20,1);
   boucleAmont=Wire.read();
   boucleAmont&=0x20;
+  Serial.print("Boucle Amont: ");
+  Serial.println(boucleAmont);
   boucleAval=Wire.read();
   boucleAval&=0x40;
-  
+  Serial.print("Boucle Aval: ");
+  Serial.println(boucleAval);
   Serial.print("Nb Voiture: ");
   Serial.println(nbVoiture);
   
@@ -40,13 +44,16 @@ void loop() {
           boucle=Wire.read();
           boucle&=0x60;
           
-          if ( boucle != 96){ // si il y a un vehicule de detecter sur la boucle aval ou amont
-            do{
-                boucleAmont=Wire.read();
-                boucleAmont&=0x20;
-                boucleAval=Wire.read();
-                boucleAval&=0x40; 
-            }while ( boucleAmont == 0 || boucleAval == 0);//tant qu'il y a un vehicule sur la boucle amont ou sur la boucle aval on ne fait rien
+          if ( boucleAmont == 0 || boucleAval == 0){ // si il y a un vehicule de detecter sur la boucle aval ou amont
+           Wire.beginTransmission(0x20);
+           Wire.requestFrom(0x20,2);
+           do{
+           boucleAmont=Wire.read();
+           boucleAval=boucleAmont;
+           boucleAmont&=0x20;
+           boucleAval&= 0x40;
+           }while(boucleAmont == 0 || boucleAval ==0); 
+            Wire.requestFrom(0x20,2);
             nbVoiture--; // decrementation du nombre de voiture
           }
          fermer();
@@ -58,6 +65,7 @@ void ouvertureBarriere(){
   Wire.write(0xFD);
   Wire.endTransmission();
 }
+
 
 void fermer (){
    Wire.beginTransmission(0x20);
