@@ -4,10 +4,16 @@
 #include <Wire.h>
 #include "I2C.h"
 
-void ouvrir(int&);
+void ouvertureBarriereEntrer(int&);
 
 void fermer(void);
 
-void ouvertureBarriere(void);
+void ouvrirBarriere(void);
+
+void lireBoucleAval(int&);
+
+void lireBoucleAmont(int&);
+
+void sortieVehicule(int&,int&,int&);
 
 #endif

@@ -53,4 +53,7 @@ void loop() {
  * 32 : Voiture detecter sur Aval et pas sur Amont
  * 64 : Voiture detecter sur Amont et pas sur Aval
  * 00 : Voiture detecter sur Aval et Amont
+ * Detecter sur boucle Aval 0
+ * Detecter sur boucle Amont 0
+ * 
  */ 

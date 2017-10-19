@@ -31,6 +31,14 @@ void loop() {
  if ( boucle == 32){ // Si il y a une Voiture sur la boucle Aval et pas sur la boucle amont
           Serial.println("Boucle Aval");
           ouvertureBarriere();
+          boucleAmont=Wire.read();
+          boucleAmont&=0x20;
+          Serial.print("Boucle Amont: ");
+          Serial.println(boucleAmont);
+          boucleAval=Wire.read();
+          boucleAval&=0x40;
+          Serial.print("Boucle Aval: ");
+          Serial.println(boucleAval);
           Wire.beginTransmission(0x20);// Permet l'initialisation de la communication avec l'adresse de la barriere 
           Wire.requestFrom(0x20,2);
           boucle=Wire.read();
