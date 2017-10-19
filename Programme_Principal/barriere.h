@@ -16,4 +16,6 @@ void lireBoucleAmont(int&);
 
 void sortieVehicule(int&,int&,int&);
 
+void detecterCarte (int&);
+
 #endif
