@@ -5,10 +5,12 @@ void ouvertureBarriereEntrer (int& nbVehicule){
   ouvrirBarriere();
   lireBoucleAval(boucleAval);
   lireBoucleAmont(boucleAmont);
-  while( boucleAmont == 0 && tempo <= 120){
-    delay(250);
+  while( boucleAmont == 0 && boucleAval == 64 && tempo < 30000){
+    delay(1);
     tempo++;
-    Serial.print("Pass tempo");
+    Serial.println("Pass tempo");
+    lireBoucleAval(boucleAval);
+    lireBoucleAmont(boucleAmont);
   }
   lireBoucleAval(boucleAval);
   lireBoucleAmont(boucleAmont);
