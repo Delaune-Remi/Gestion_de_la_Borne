@@ -22,7 +22,6 @@ void ouvertureBarriereEntrer (int& nbVehicule){
         while ( boucleAmont == 0 || boucleAval == 0){
           lireBoucleAval(boucleAval);
           lireBoucleAmont(boucleAmont);
-          Serial.print("Pass boucle Aval ou Boucle Amont2");
         }
         nbVehicule++;
         Serial.print("Nb Voiture: ");
@@ -99,7 +98,7 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
             Serial.println ("Veuillez quitter l'entrer"); // Affiche sur la liaison serie un message
             lireBoucleAval(boucleAval);   //Appel d'une fonction qui detecte l'etat de la boucle Aval
             lireBoucleAmont(boucleAmont); //Appel d'une fonction qui detecte l'etat de la boucle Amont
-         }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule ( detecter: 0 et non detecter: 1)
+         }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule
       }
    }
 }
