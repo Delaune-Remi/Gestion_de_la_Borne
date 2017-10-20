@@ -8,7 +8,6 @@ void ouvertureBarriereEntrer (int& nbVehicule){
   while( boucleAmont == 0 && boucleAval == 64 && tempo < 30000){
     delay(1);
     tempo++;
-    Serial.println("Pass tempo");
     lireBoucleAval(boucleAval);
     lireBoucleAmont(boucleAmont);
   }
@@ -17,9 +16,7 @@ void ouvertureBarriereEntrer (int& nbVehicule){
   if (boucleAmont == 0 && boucleAval == 0){
       lireBoucleAval(boucleAval);
       lireBoucleAmont(boucleAmont);
-      Serial.print("Pass Boucle Amont1");
       if (boucleAmont == 0 || boucleAval == 0){
-        Serial.print("Pass boucle Aval ou Boucle Amont1");
         lireBoucleAval(boucleAval);
         lireBoucleAmont(boucleAmont);
         while ( boucleAmont == 0 || boucleAval == 0){
@@ -32,10 +29,10 @@ void ouvertureBarriereEntrer (int& nbVehicule){
         Serial.println(nbVehicule);
       }  
   }  
-  fermer();
+  fermerBarriere();
 }
 
-void fermer (void){
+void fermerBarriere (void){
   Wire.beginTransmission ( 0x20); // Initialisation de la transmission du bus I2C pour la barriere qui est a l'adresse 0x21
   Wire.write (0xFE);  // Ferme la barriere
   Wire.endTransmission();
@@ -78,7 +75,7 @@ void sortieVehicule (int& nbVoiture,int& boucleAmont,int& boucleAval){
         }while ( boucleAmont == 0 || boucleAval == 0);  //tant qu'il y a un vehicule sur la boucle amont ou sur la boucle aval on ne fait rien
         nbVoiture--; // decrementation du nombre de voiture
      }
-    fermer ();  // Fonction permettant de fermer la barriere
+    fermerBarriere ();  // Fonction permettant de fermer la barriere
 }
 
 void detecterCarte (int& carte){
@@ -86,5 +83,24 @@ void detecterCarte (int& carte){
   Wire.requestFrom (0x21,1);
   carte = Wire.read();
   carte &= 0x01;
+}
+
+void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
+   int code = 12;    // Initialisation du password a 12
+   int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
+   Serial.println("Boucle Amont"); // Affiche sur le moniteur Serie le texte "Boucle Amont: "
+   detecterCarte(carte);     // Appel d'une fonction qui detecte une carte
+   if ( carte == 0){  // Condition permettant de verifier si il y a une carte a puce de detecter
+      if (code == 12){  // Si le code est egal a 12 alors on ouvre la barriere
+         ouvertureBarriereEntrer (nbVoiture); // Fonction pour ouvrir la barriere quand un vehicule rentre, on donne le nombre de voiture actuel
+      }else{
+         Wire.beginTransmission (0x20);       // Initialisation de la transmission du bus I2C pour le capteur des boucle qui est a l'adresse 0x20
+         do{
+            Serial.println ("Veuillez quitter l'entrer"); // Affiche sur la liaison serie un message
+            lireBoucleAval(boucleAval);   //Appel d'une fonction qui detecte l'etat de la boucle Aval
+            lireBoucleAmont(boucleAmont); //Appel d'une fonction qui detecte l'etat de la boucle Amont
+         }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule ( detecter: 0 et non detecter: 1)
+      }
+   }
 }
 
