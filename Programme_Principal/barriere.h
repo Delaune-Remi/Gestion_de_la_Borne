@@ -119,4 +119,9 @@ void lectureClavier (char* const);
  * 
  * Elle ne renvoie rien
  */
+
+ int detectionTouche(void);
+
+ char conversionTouche(void);
+ 
 #endif
