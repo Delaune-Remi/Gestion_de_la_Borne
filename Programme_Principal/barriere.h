@@ -109,4 +109,14 @@ void entrerVehicule(int&,int&,int&);
  * Elle ne renvoie rien.
  */
 
+void lectureClavier (char* const);
+
+/*
+ * Fonction permettant de lire le code entrer sur le clavier.
+ * 
+ * La fonction a pour parametre d'entrer:
+ *  - L'espace memoire reserve au code
+ * 
+ * Elle ne renvoie rien
+ */
 #endif

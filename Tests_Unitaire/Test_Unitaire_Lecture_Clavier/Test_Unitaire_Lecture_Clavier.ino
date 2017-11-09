@@ -1,7 +1,8 @@
 #include <Wire.h>
 #include "I2C.h"
+#include "Clavier.h"
 
-
+#define TAILLECODE 4
 
 void setup() {
     Wire.begin();
@@ -11,15 +12,24 @@ void setup() {
 }
 
 void loop() {
-  int val;
+  int touchedetecter=0;
+  int i=0;
+  char* code(NULL);
   
-  Wire.beginTransmission(0x22);
-  Wire.write(0x0F);
-  Wire.endTransmission();
-  Wire.requestFrom(0x22,1);
-  val=Wire.read();
-  Serial.print("La Valeur du clavier est: ");
-  Serial.println(val,BIN);
-  delay(500);
-  
+  code = new char [TAILLECODE];
+  while (i<TAILLECODE){
+     touchedetecter=detectionTouche();
+     if (touchedetecter==1){
+       *(code+i)=conversionTouche();
+     //  Serial.print("La touche appuyer est : ");
+     //  Serial.println(*(code+i));
+       i++;
+     }
+     delay(200);
+  }
+    
+  if (i==TAILLECODE){
+    affichageCode(code,i);
+  }  
+  delete code;
 }
