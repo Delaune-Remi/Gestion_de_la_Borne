@@ -87,6 +87,9 @@ void detecterCarte (int& carte){
 }
 
 void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
+   int toucheDetecter=0;  //  Initialisation d'une variable qui permet de detecter si une touche est appuyer
+   int i=0,essaiCode;
+   char* codeClavier(NULL);// Initialisation d'un pointeur du charactere a NULL qui permet de recuperer le code ecrit au clavier
    int code = 12;    // Initialisation du password a 12
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
    Serial.println("Boucle Amont"); // Affiche sur le moniteur Serie le texte "Boucle Amont: "
@@ -101,6 +104,20 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
             lireBoucleAval(boucleAval);   //Appel d'une fonction qui detecte l'etat de la boucle Aval
             lireBoucleAmont(boucleAmont); //Appel d'une fonction qui detecte l'etat de la boucle Amont
          }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule
+      }
+   }else{
+      if (toucheDetecter == 1){
+        essaiCode=0;
+        do{
+          lectureClavier(codeClavier);
+          essaiCode++;
+        }while ((*codeClavier != "1234") && (essaiCode<3));
+        if (*codeClavier == "1234"){
+          ouvertureBarriereEntrer(nbVoiture);
+        }else{
+          
+        }
+        delete [] codeClavier;
       }
    }
 }
@@ -191,16 +208,14 @@ char conversionTouche(void){
   return valeur;
 }
 
-void lectureClavier(char*const code){
+void lectureClavier(char* const code){
+  code= new char [TAILLECODE];
   int touchedetecter=0;
   int i=0;
-  //code = new char [TAILLECODE];
   while (i<TAILLECODE){
      touchedetecter=detectionTouche();
      if (touchedetecter==1){
-       *(code+i)=conversionTouche();
-     //  Serial.print("La touche appuyer est : ");
-     //  Serial.println(*(code+i));
+       strcpy(code+i,conversionTouche());
        i++;
      }
      delay(200);
