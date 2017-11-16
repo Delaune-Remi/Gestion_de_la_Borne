@@ -76,6 +76,9 @@ void sortieVehicule (int& nbVoiture,int& boucleAmont,int& boucleAval){
         }while ( boucleAmont == 0 || boucleAval == 0);  //tant qu'il y a un vehicule sur la boucle amont ou sur la boucle aval on ne fait rien
         nbVoiture--; // decrementation du nombre de voiture
      }
+    effacerAfficheur(0x3B);
+    setEclairage(0x21,HIGH);
+    envoyerMessage(0x3B,MESSAGE5,LIGNE1);
     fermerBarriere ();  // Fonction permettant de fermer la barriere
 }
 
@@ -90,11 +93,13 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    int toucheDetecter=0;  //  Initialisation d'une variable qui permet de detecter si une touche est appuyer
    int i=0,essaiCode;
    char* codeClavier(NULL);// Initialisation d'un pointeur du charactere a NULL qui permet de recuperer le code ecrit au clavier
+   codeClavier = new char [TAILLECODE];
    int code = 12;    // Initialisation du password a 12
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
-   Serial.println("Boucle Amont"); // Affiche sur le moniteur Serie le texte "Boucle Amont: "
+   
    detecterCarte(carte);     // Appel d'une fonction qui detecte une carte
-   if ( carte == 0){  // Condition permettant de verifier si il y a une carte a puce de detecter
+   if ( carte == 0){ // Condition permettant de verifier si il y a une carte a puce de detecter
+      effacerAfficheur(0x3B);
       if (code == 12){  // Si le code est egal a 12 alors on ouvre la barriere
          ouvertureBarriereEntrer (nbVoiture); // Fonction pour ouvrir la barriere quand un vehicule rentre, on donne le nombre de voiture actuel
       }else{
@@ -106,19 +111,32 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
          }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule
       }
    }else{
+      
+      toucheDetecter=detectionTouche();
       if (toucheDetecter == 1){
+        effacerAfficheur(0x3B);
+        setEclairage(0x21,HIGH);
+        envoyerMessage(0x3B,MESSAGE2,LIGNE1);
         essaiCode=0;
         do{
+          effacerAfficheur(0x3B);
+          envoyerMessage(0x3B,"Votre Code :",LIGNE1);
           lectureClavier(codeClavier);
           essaiCode++;
-        }while ((*codeClavier != "1234") && (essaiCode<3));
-        if (*codeClavier == "1234"){
+        }while ((*(codeClavier) != '1' || *(codeClavier+1) != '2' || *(codeClavier+2) != '3' || *(codeClavier+3) != '4')&& (essaiCode<3));
+        if (*(codeClavier) == '1' && *(codeClavier+1) == '2' && *(codeClavier+2) == '3' && *(codeClavier+3) == '4'){
+          effacerAfficheur(0x3B);
+          envoyerMessage(0x3B,MESSAGE3,LIGNE1);
           ouvertureBarriereEntrer(nbVoiture);
         }else{
-          
+          effacerAfficheur(0x3B);
+          envoyerMessage(0x3B,MESSAGE8,LIGNE1);
+          envoyerMessage(0x3B,MESSAGE6,LIGNE2);
+          delay(1000);
         }
         delete [] codeClavier;
       }
+      effacerAfficheur(0x3B);
    }
 }
 
@@ -208,16 +226,30 @@ char conversionTouche(void){
   return valeur;
 }
 
-void lectureClavier(char* const code){
-  code= new char [TAILLECODE];
+void lectureClavier(char* code){  
   int touchedetecter=0;
   int i=0;
   while (i<TAILLECODE){
      touchedetecter=detectionTouche();
      if (touchedetecter==1){
-       strcpy(code+i,conversionTouche());
+      *(code+i)= conversionTouche();
        i++;
      }
+     switch(i){
+        case 1:
+          envoyerMessage(0x3B,"       *",LIGNE2);
+          break;
+        case 2:
+          envoyerMessage(0x3B,"      **",LIGNE2);
+          break;
+        case 3:
+          envoyerMessage(0x3B,"      ***",LIGNE2);
+          break;
+        case 4:
+          envoyerMessage(0x3B,"     ****",LIGNE2);
+          break;
+     }
+     
      delay(200);
   }
 }

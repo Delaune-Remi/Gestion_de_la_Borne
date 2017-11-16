@@ -3,6 +3,7 @@
 
 #include <Wire.h>   // Inclusion de la librairie pour les Liaison Series
 #include "I2C.h"    // Inclusion de la librairie permettant d'initialiser le bus I2C 
+#include "affiche.h"
 
 void ouvertureBarriereEntrer(int&);
 
@@ -109,7 +110,7 @@ void entrerVehicule(int&,int&,int&);
  * Elle ne renvoie rien.
  */
 
-void lectureClavier (char* const);
+void lectureClavier (char*);
 
 /*
  * Fonction permettant de lire le code entrer sur le clavier.
@@ -121,7 +122,27 @@ void lectureClavier (char* const);
  */
 
  int detectionTouche(void);
+ 
+ /*
+  * Fonction permettant de detecter si une touche est appuyer.
+  * 
+  * La fonction n'a pas de parametre d'entrer.
+  * 
+  * Elle renvoie une variable de type entier:
+  *   - 0 :  touche non detecter
+  *   - 1 :  touche detecter
+  * 
+  */
 
  char conversionTouche(void);
- 
+
+ /*
+  * Fonction permettant de convertir la touche est appuyer en caractere.
+  * 
+  * La fonction n'a pas de parametre d'entrer.
+  * 
+  * Elle renvoie une variable de type caractere qui contient le caractere correspond a la touche appuyer.
+  * 
+  */
+
 #endif

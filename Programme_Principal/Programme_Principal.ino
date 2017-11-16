@@ -6,6 +6,8 @@ int boucleAval;   // Declaration d'une variable pour la boucle Aval
 
 void setup() {
   initI2C(250);   // initialisation de la vitesse du bus I2C
+  initAfficheur(0x3B);
+  effacerAfficheur(0x3B);
   Serial.begin(9600); // initialisation de la vitesse de la liaison serie a 9600 bauds
 }
 
@@ -18,6 +20,9 @@ void loop() {
    lireBoucleAval(boucleAval);    // Appel d'une fonction qui lit l'etat de la boucle Aval
    lireBoucleAmont(boucleAmont);  // Appel d'une fonction qui lit l'etat de la boucle Amont
       if ( boucleAmont == 0 && boucleAval == 64){ // Si il y a une Voiture sur la boucle Amont et pas sur la boucle Aval
+          effacerAfficheur(0x3B);
+          setEclairage(0x21,HIGH);
+          envoyerMessage(0x3B,"    Bonjour     ",LIGNE1);
           entrerVehicule(nbVoiture,boucleAmont,boucleAval);
       }
       lireBoucleAval(boucleAval); // Appel d'une fonction qui lit l'etat de la boucle Aval

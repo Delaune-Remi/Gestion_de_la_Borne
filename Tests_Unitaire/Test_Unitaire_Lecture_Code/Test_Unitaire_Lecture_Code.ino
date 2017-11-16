@@ -19,13 +19,12 @@ void loop() {
   Serial.print("Val: ");
   Serial.println(val);
     if (val == 0){
-     
-      
+      Wire.write(0x03);
       Serial.end();
       Serial.begin(9600);
       initI2C(120);  
       Wire.beginTransmission(0x50);
-    //  Wire.requestFrom(0x50,2);
+     // Wire.requestFrom(0x50,2);
       password=Wire.read();
       
       Serial.print("PassWord: ");
