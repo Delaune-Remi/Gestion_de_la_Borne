@@ -17,9 +17,12 @@ void loop() {
   Serial.println(val);
   if (val == 0){
       val&=0x02;
-      val=Wire.read();
-      Serial.print("Signaux distribue a la carte a puce :");
-      Serial.println(val);
+      val=Wire.write(1);
+      Wire.beginTransmission(0x50);
+      Wire.requestFrom(0x50,1); // 0x50 adresse de la carte a puce
+      valCode=Wire.read();
+      Serial.print("Signaux de la carte a puce :");
+      Serial.println(valCode);
   }
  Serial.end();
  Wire.endTransmission();
