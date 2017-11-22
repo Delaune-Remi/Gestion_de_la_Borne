@@ -2,7 +2,7 @@
 #include "I2C.h"
 
 void setup() {
-    initI2C(120);       
+    initI2C(255);       
     Serial.begin(9600);
 }
 
@@ -10,17 +10,20 @@ void loop() {
   int val,valCode;
   
   Wire.beginTransmission(0x21);
-  Wire.requestFrom(0x21,2); // 0x21 adresse de la carte a puce
-  val=Wire.read();
-  val&=0x01; 
+  Wire.requestFrom(0x21,1); // 0x21 adresse de la carte a puce
+  while(Wire.available()){
+     val=Wire.read();
+  }
   Serial.print("Carte Detecter :");
-  Serial.println(val);
+  Serial.println(val,BIN);
   if (val == 0){
-      val&=0x02;
-      val=Wire.write(1);
+      Wire.write(0x02);
       Wire.beginTransmission(0x50);
-      Wire.requestFrom(0x50,1); // 0x50 adresse de la carte a puce
+      Wire.requestFrom(0x50,2); // 0x50 adresse de la carte a puce
       valCode=Wire.read();
+      Wire.beginTransmission(0x21);
+      Wire.requestFrom(0x21,2); // 0x21 adresse de la carte a puce
+      Wire.write(0x00);
       Serial.print("Signaux de la carte a puce :");
       Serial.println(valCode);
   }

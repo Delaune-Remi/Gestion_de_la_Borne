@@ -84,9 +84,8 @@ void sortieVehicule (int& nbVoiture,int& boucleAmont,int& boucleAval){
 
 void detecterCarte (int& carte){
   Wire.beginTransmission(0x21);   // Initialisation de la transmission du bus I2C pour le capteur de carte a puce qui est a l'adresse 0x21
-  Wire.requestFrom (0x21,1);
-  carte = Wire.read();
-  carte &= 0x01;
+  Wire.requestFrom (0x21,2);
+  carte=Wire.read();
 }
 
 void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
@@ -96,9 +95,15 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    codeClavier = new char [TAILLECODE];
    int code = 12;    // Initialisation du password a 12
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
-   
-   detecterCarte(carte);     // Appel d'une fonction qui detecte une carte
-   if ( carte == 0){ // Condition permettant de verifier si il y a une carte a puce de detecter
+   delay(2000);
+   effacerAfficheur(0x3B);
+   envoyerMessage(0x3B,MESSAGE2,LIGNE1);
+   envoyerMessage(0x3B,"ou une Carte",LIGNE2);
+   for(int i=0; i<=2000 && toucheDetecter != 1 && (carte & 0x01) == 1 ; i++){
+        toucheDetecter=detectionTouche();
+        detecterCarte(carte);     // Appel d'une fonction qui detecte une carte
+    }
+   if ( (carte & 0x01) == 0){ // Condition permettant de verifier si il y a une carte a puce de detecter
       effacerAfficheur(0x3B);
       if (code == 12){  // Si le code est egal a 12 alors on ouvre la barriere
          ouvertureBarriereEntrer (nbVoiture); // Fonction pour ouvrir la barriere quand un vehicule rentre, on donne le nombre de voiture actuel
@@ -111,8 +116,6 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
          }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule
       }
    }else{
-      
-      toucheDetecter=detectionTouche();
       if (toucheDetecter == 1){
         effacerAfficheur(0x3B);
         setEclairage(0x21,HIGH);
@@ -135,6 +138,10 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
           delay(1000);
         }
         delete [] codeClavier;
+      }else{
+        effacerAfficheur(0x3B);
+        envoyerMessage(0x3B,MESSAGE5,LIGNE1);
+        envoyerMessage(0x3B,MESSAGE6,LIGNE2);   
       }
       effacerAfficheur(0x3B);
    }
@@ -208,6 +215,8 @@ char conversionTouche(void){
             break;
           case 48:
             valeur = '9';
+          default:
+            valeur = 'A';
         }
         break;
       case 7:
@@ -233,7 +242,9 @@ void lectureClavier(char* code){
      touchedetecter=detectionTouche();
      if (touchedetecter==1){
       *(code+i)= conversionTouche();
-       i++;
+      if (*(code+i)!='A'){
+        i++;
+      }
      }
      switch(i){
         case 1:

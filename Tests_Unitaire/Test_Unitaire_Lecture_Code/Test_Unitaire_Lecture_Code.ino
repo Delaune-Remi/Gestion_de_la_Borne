@@ -19,7 +19,7 @@ void loop() {
   Serial.print("Val: ");
   Serial.println(val);
     if (val == 0){
-      Wire.write(0x03);
+      Wire.write(0x02);
       Serial.end();
       Serial.begin(9600);
       initI2C(120);  
@@ -31,7 +31,7 @@ void loop() {
       Serial.println(password);
       
       Wire.endTransmission();  
-      Serial.end();
+      //Serial.end();
     }
 }
 

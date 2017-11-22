@@ -22,7 +22,7 @@ void loop() {
       if ( boucleAmont == 0 && boucleAval == 64){ // Si il y a une Voiture sur la boucle Amont et pas sur la boucle Aval
           effacerAfficheur(0x3B);
           setEclairage(0x21,HIGH);
-          envoyerMessage(0x3B,"    Bonjour     ",LIGNE1);
+          envoyerMessage(0x3B,MESSAGE1,LIGNE1);
           entrerVehicule(nbVoiture,boucleAmont,boucleAval);
       }
       lireBoucleAval(boucleAval); // Appel d'une fonction qui lit l'etat de la boucle Aval
