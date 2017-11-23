@@ -121,6 +121,17 @@ void lectureClavier (char*);
  * Elle ne renvoie rien
  */
 
+void lectureCodeCarte(char*);
+
+/*
+ * Fonction permettant de lire le code de la carte a puce.
+ * 
+ * La fonction a pour parametre d'entrer:
+ *  - L'espace memoire reserve au code
+ * 
+ * Elle ne renvoie rien
+ */
+
  int detectionTouche(void);
  
  /*

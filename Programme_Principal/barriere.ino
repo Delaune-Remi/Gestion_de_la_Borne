@@ -2,12 +2,13 @@
 
 #define TAILLECODE 4
 
+
 void ouvertureBarriereEntrer (int& nbVehicule){
   int tempo=0,boucleAmont,boucleAval;
   ouvrirBarriere();
   lireBoucleAval(boucleAval);
   lireBoucleAmont(boucleAmont);
-  while( boucleAmont == 0 && boucleAval == 64 && tempo < 30000){
+  while( boucleAmont == 0 && boucleAval == 64 && tempo < 3000){
     delay(1);
     tempo++;
     lireBoucleAval(boucleAval);
@@ -93,22 +94,27 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    int i=0,essaiCode;
    char* codeClavier(NULL);// Initialisation d'un pointeur du charactere a NULL qui permet de recuperer le code ecrit au clavier
    codeClavier = new char [TAILLECODE];
-   int code = 12;    // Initialisation du password a 12
+   char* code (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
+   code = new char [4];
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
    delay(2000);
    effacerAfficheur(0x3B);
    envoyerMessage(0x3B,MESSAGE2,LIGNE1);
    envoyerMessage(0x3B,"ou une Carte",LIGNE2);
-   for(int i=0; i<=2000 && toucheDetecter != 1 && (carte & 0x01) == 1 ; i++){
+   for(int i=0; i<=2000 && toucheDetecter != 1 && ((carte & 0x01) == 1 || i<2 ) ; i++){
         toucheDetecter=detectionTouche();
         detecterCarte(carte);     // Appel d'une fonction qui detecte une carte
     }
-   if ( (carte & 0x01) == 0){ // Condition permettant de verifier si il y a une carte a puce de detecter
+   if ((carte & 0x01) == 0){ // Condition permettant de verifier si il y a une carte a puce de detecter
       effacerAfficheur(0x3B);
-      if (code == 12){  // Si le code est egal a 12 alors on ouvre la barriere
+      setEclairage(0x21,HIGH);
+      envoyerMessage(0x3B,"Votre Code :",LIGNE1);
+      lectureCodeCarte(code);
+      if (*code == '3' && *(code+1)== '4' && *(code+2)== '5' && *(code+3)== '6'){  // Si le code est egal a 3456 alors on ouvre la barriere
          ouvertureBarriereEntrer (nbVoiture); // Fonction pour ouvrir la barriere quand un vehicule rentre, on donne le nombre de voiture actuel
+         delete[] code;
       }else{
-         Wire.beginTransmission (0x20);       // Initialisation de la transmission du bus I2C pour le capteur des boucle qui est a l'adresse 0x20
+          Wire.beginTransmission (0x20);       // Initialisation de la transmission du bus I2C pour le capteur des boucle qui est a l'adresse 0x20
          do{
             Serial.println ("Veuillez quitter l'entrer"); // Affiche sur la liaison serie un message
             lireBoucleAval(boucleAval);   //Appel d'une fonction qui detecte l'etat de la boucle Aval
@@ -263,5 +269,34 @@ void lectureClavier(char* code){
      
      delay(200);
   }
+}
+
+void lectureCodeCarte(char* code){
+  byte* valCode(NULL);
+  valCode = new byte [5];
+  
+  Wire.beginTransmission(0x21);
+  Wire.requestFrom(0x21,2); // 0x21 adresse de la carte a puce
+  Wire.write(0x02);
+  Wire.endTransmission();
+  Wire.beginTransmission(0x50);
+  Wire.requestFrom(0x50,5,true); // 0x50 adresse de l'EPROM I2C de la carte a puce
+  *valCode=Wire.read();
+  *(valCode+1)=Wire.read();
+  envoyerMessage(0x3B,"       *",LIGNE2);
+  *(valCode+2)=Wire.read();
+  envoyerMessage(0x3B,"      **",LIGNE2);
+  *(valCode+3)=Wire.read();
+  envoyerMessage(0x3B,"      ***",LIGNE2);
+  *(valCode+4)=Wire.read();
+  envoyerMessage(0x3B,"     ****",LIGNE2);
+  Wire.endTransmission();
+  Wire.beginTransmission(0x21);
+  Wire.requestFrom(0x21,2); // 0x21 adresse de la carte a puce
+  Wire.write(0x01);
+  for (int i = 0;i<5;i++){
+     *(code+i)=static_cast<char>(*(valCode+1+i));
+   }
+  delete [] valCode;
 }
 

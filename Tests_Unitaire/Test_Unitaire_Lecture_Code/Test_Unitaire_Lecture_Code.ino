@@ -2,7 +2,8 @@
 #include "I2C.h"
 
 void setup() {
-   initI2C(120);  
+   initI2C(120); 
+   Serial.begin(9600);  
 }
 
 void loop() {
@@ -14,7 +15,7 @@ void loop() {
   Wire.requestFrom(0x21,2); // 0x21 adresse de la carte a puce
   val=Wire.read();
   val&=0x01; 
-  Serial.begin(9600);
+ 
       
   Serial.print("Val: ");
   Serial.println(val);
@@ -24,11 +25,16 @@ void loop() {
       Serial.begin(9600);
       initI2C(120);  
       Wire.beginTransmission(0x50);
-     // Wire.requestFrom(0x50,2);
+      Wire.requestFrom(0x50,4);
       password=Wire.read();
       
       Serial.print("PassWord: ");
       Serial.println(password);
+      
+      Wire.beginTransmission(0x21);
+      Wire.requestFrom(0x21,2);
+
+      Wire.write(0x01);
       
       Wire.endTransmission();  
       //Serial.end();
