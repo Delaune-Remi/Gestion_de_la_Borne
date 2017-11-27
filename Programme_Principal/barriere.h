@@ -4,6 +4,7 @@
 #include <Wire.h>   // Inclusion de la librairie pour les Liaison Series
 #include "I2C.h"    // Inclusion de la librairie permettant d'initialiser le bus I2C 
 #include "affiche.h"
+#include <string.h>
 
 void ouvertureBarriereEntrer(int&);
 
@@ -132,7 +133,21 @@ void lectureCodeCarte(char*);
  * Elle ne renvoie rien
  */
 
- int detectionTouche(void);
+int validationCode(const char* const,const char* const );
+
+/*
+ * Fonction permettant de valider le code entrer
+ * 
+ * La fonction a pour parametre d'entrer: 
+ *  - L'espace memoire reserve au code
+ *  -L'espace memoire reserve au code EEPROM
+ *  
+ *  Elle renvoie une valeur qui est :
+ *    - 0 : code non valide
+ *    - 1 : code valide
+ */
+
+int detectionTouche(void);
  
  /*
   * Fonction permettant de detecter si une touche est appuyer.
@@ -145,7 +160,7 @@ void lectureCodeCarte(char*);
   * 
   */
 
- char conversionTouche(void);
+char conversionTouche(void);
 
  /*
   * Fonction permettant de convertir la touche est appuyer en caractere.
@@ -156,4 +171,14 @@ void lectureCodeCarte(char*);
   * 
   */
 
+void setCodeEEPROM (void);
+
+/*
+ * Fonction permettant de saisir des codes dans le EEPROM de la barriere (pour le gardien)
+ */
+
+void getCodeEEPROM(char*);
+/*
+ * Fonction permettant de recuperer les codes dans le EEPROM de la barriere
+ */
 #endif

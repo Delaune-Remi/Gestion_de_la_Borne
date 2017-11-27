@@ -9,6 +9,7 @@ void setup() {
   initAfficheur(0x3B);
   effacerAfficheur(0x3B);
   Serial.begin(9600); // initialisation de la vitesse de la liaison serie a 9600 bauds
+  setCodeEEPROM();
 }
 
 void loop() {

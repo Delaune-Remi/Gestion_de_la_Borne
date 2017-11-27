@@ -95,7 +95,10 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    char* codeClavier(NULL);// Initialisation d'un pointeur du charactere a NULL qui permet de recuperer le code ecrit au clavier
    codeClavier = new char [TAILLECODE];
    char* code (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
-   code = new char [4];
+   code = new char [5];
+   char* codeEEPROM (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
+   codeEEPROM = new char [4];
+   getCodeEEPROM(codeEEPROM);
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
    delay(2000);
    effacerAfficheur(0x3B);
@@ -110,13 +113,15 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
       setEclairage(0x21,HIGH);
       envoyerMessage(0x3B,"Votre Code :",LIGNE1);
       lectureCodeCarte(code);
-      if (*code == '3' && *(code+1)== '4' && *(code+2)== '5' && *(code+3)== '6'){  // Si le code est egal a 3456 alors on ouvre la barriere
+      if (validationCode(code,codeEEPROM)==1){  // Si le code est egal a 3456 alors on ouvre la barriere
          ouvertureBarriereEntrer (nbVoiture); // Fonction pour ouvrir la barriere quand un vehicule rentre, on donne le nombre de voiture actuel
          delete[] code;
       }else{
           Wire.beginTransmission (0x20);       // Initialisation de la transmission du bus I2C pour le capteur des boucle qui est a l'adresse 0x20
          do{
-            Serial.println ("Veuillez quitter l'entrer"); // Affiche sur la liaison serie un message
+            effacerAfficheur(0x3B);
+            setEclairage(0x21,HIGH);
+            envoyerMessage(0x3B,MESSAGE8,LIGNE1);
             lireBoucleAval(boucleAval);   //Appel d'une fonction qui detecte l'etat de la boucle Aval
             lireBoucleAmont(boucleAmont); //Appel d'une fonction qui detecte l'etat de la boucle Amont
          }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule
@@ -132,8 +137,8 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
           envoyerMessage(0x3B,"Votre Code :",LIGNE1);
           lectureClavier(codeClavier);
           essaiCode++;
-        }while ((*(codeClavier) != '1' || *(codeClavier+1) != '2' || *(codeClavier+2) != '3' || *(codeClavier+3) != '4')&& (essaiCode<3));
-        if (*(codeClavier) == '1' && *(codeClavier+1) == '2' && *(codeClavier+2) == '3' && *(codeClavier+3) == '4'){
+        }while ( validationCode(codeClavier,codeEEPROM) == 0 && (essaiCode<3));
+        if (validationCode(codeClavier,codeEEPROM)== 1){
           effacerAfficheur(0x3B);
           envoyerMessage(0x3B,MESSAGE3,LIGNE1);
           ouvertureBarriereEntrer(nbVoiture);
@@ -148,9 +153,9 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
         effacerAfficheur(0x3B);
         envoyerMessage(0x3B,MESSAGE5,LIGNE1);
         envoyerMessage(0x3B,MESSAGE6,LIGNE2);   
-      }
-      effacerAfficheur(0x3B);
+      } 
    }
+  effacerAfficheur(0x3B);
 }
 
 int detectionTouche (void){
@@ -221,6 +226,7 @@ char conversionTouche(void){
             break;
           case 48:
             valeur = '9';
+            break;
           default:
             valeur = 'A';
         }
@@ -281,6 +287,7 @@ void lectureCodeCarte(char* code){
   Wire.endTransmission();
   Wire.beginTransmission(0x50);
   Wire.requestFrom(0x50,5,true); // 0x50 adresse de l'EPROM I2C de la carte a puce
+  setEclairage(0x21,HIGH);
   *valCode=Wire.read();
   *(valCode+1)=Wire.read();
   envoyerMessage(0x3B,"       *",LIGNE2);
@@ -297,6 +304,48 @@ void lectureCodeCarte(char* code){
   for (int i = 0;i<5;i++){
      *(code+i)=static_cast<char>(*(valCode+1+i));
    }
+  delete [] valCode;
+}
+
+int validationCode(const char* const code,const char* const codeEEPROM){
+ if (*code == '3' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' || *code == '1' && *(code+1) == '2' && *(code+2)== '3' && *(code+3)=='4' || *(code)== *(codeEEPROM) && *(code+1) == *(codeEEPROM+1) && *(code+2) == *(codeEEPROM+2)&& *(code+3) == *(codeEEPROM+3))
+{
+     return 1;
+  }else{
+     return 0;
+  }
+}
+
+void setCodeEEPROM(void){
+  Wire.beginTransmission(0x57);
+  Wire.write(49);
+  Wire.write(57);
+  Wire.write(57);
+  Wire.write(56);
+  Wire.endTransmission();
+}
+
+void getCodeEEPROM(char* codeEEPROM){
+  byte* valCode(NULL);
+  valCode = new byte [4]; 
+  Wire.beginTransmission(0x57);
+  Wire.requestFrom(0x57,4,true); // 0x57 adresse de l'EPROM I2C de la memoire
+  *(valCode)=Wire.read();
+  *(valCode+1)=Wire.read();
+  *(valCode+2)=Wire.read();
+  *(valCode+3)=Wire.read();
+  Wire.endTransmission();
+  Serial.println("Code EEPROM:");
+  for (int i = 0;i<4;i++){
+     Serial.print(*(valCode+i));
+   }
+  Serial.println(" ");
+  Serial.println("Code EEPROM:");
+  for (int i = 0;i<4;i++){
+     *(codeEEPROM+i)=static_cast<char>(*(valCode+i));
+     Serial.print(*(codeEEPROM+i));
+   }
+  Serial.println(" ");
   delete [] valCode;
 }
 
