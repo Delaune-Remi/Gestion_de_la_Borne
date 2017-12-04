@@ -4,7 +4,6 @@
 #include <Wire.h>   // Inclusion de la librairie pour les Liaison Series
 #include "I2C.h"    // Inclusion de la librairie permettant d'initialiser le bus I2C 
 #include "affiche.h"
-#include <string.h>
 
 void ouvertureBarriereEntrer(int&);
 
@@ -181,4 +180,29 @@ void getCodeEEPROM(char*);
 /*
  * Fonction permettant de recuperer les codes dans le EEPROM de la barriere
  */
+
+void gardien(int);
+
+/*
+ * Fonction permettant d'afficher au moniteur serie du gardien le nombre de voiture presente dans le parking et mettre des code qui seront valides. 
+ * 
+ * La fonction a pour parametre d'entrer:
+ *  - le nombre de voiture presente dans le parking
+ *  
+ * Elle ne renvoie rien.
+ * 
+ */
+
+ void entrerCodeGardien(char* const );
+
+/*
+ * Fonction permettant d'afficher au moniteur serie du gardien le nombre de voiture presente dans le parking et mettre des code qui seront valides. 
+ * 
+ * La fonction a pour parametre d'entrer:
+ *  - l'espace memoire reserver pour le code
+ *  
+ * Elle ne renvoie rien.
+ * 
+ */
 #endif
+

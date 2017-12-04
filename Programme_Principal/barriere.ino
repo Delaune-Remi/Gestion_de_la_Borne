@@ -30,8 +30,15 @@ void ouvertureBarriereEntrer (int& nbVehicule){
         Serial.print("Nb Voiture: ");
         Serial.println(nbVehicule);
       }  
-  }  
-  fermerBarriere();
+  }
+  effacerAfficheur(0x3B);
+  envoyerMessage(0x3B,MESSAGE8,LIGNE1);
+  envoyerMessage(0x3B,MESSAGE6,LIGNE2);
+  do{
+    fermerBarriere();
+    lireBoucleAmont(boucleAmont); //Appel d'une fonction qui detecte l'etat de la boucle Amont
+  }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule  
+  
 }
 
 void fermerBarriere (void){
@@ -95,9 +102,9 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    char* codeClavier(NULL);// Initialisation d'un pointeur du charactere a NULL qui permet de recuperer le code ecrit au clavier
    codeClavier = new char [TAILLECODE];
    char* code (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
-   code = new char [5];
+   code = new char [TAILLECODE+1];
    char* codeEEPROM (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
-   codeEEPROM = new char [4];
+   codeEEPROM = new char [TAILLECODE];
    getCodeEEPROM(codeEEPROM);
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
    delay(2000);
@@ -122,7 +129,6 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
             effacerAfficheur(0x3B);
             setEclairage(0x21,HIGH);
             envoyerMessage(0x3B,MESSAGE8,LIGNE1);
-            lireBoucleAval(boucleAval);   //Appel d'une fonction qui detecte l'etat de la boucle Aval
             lireBoucleAmont(boucleAmont); //Appel d'une fonction qui detecte l'etat de la boucle Amont
          }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule
       }
@@ -146,7 +152,9 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
           effacerAfficheur(0x3B);
           envoyerMessage(0x3B,MESSAGE8,LIGNE1);
           envoyerMessage(0x3B,MESSAGE6,LIGNE2);
-          delay(1000);
+          do{
+            lireBoucleAmont(boucleAmont); //Appel d'une fonction qui detecte l'etat de la boucle Amont
+          }while ( boucleAmont == 0);      // tant que la boucle amont detecte un vehicule
         }
         delete [] codeClavier;
       }else{
@@ -297,19 +305,22 @@ void lectureCodeCarte(char* code){
   envoyerMessage(0x3B,"      ***",LIGNE2);
   *(valCode+4)=Wire.read();
   envoyerMessage(0x3B,"     ****",LIGNE2);
+  effacerAfficheur(0x3B);
   Wire.endTransmission();
   Wire.beginTransmission(0x21);
-  Wire.requestFrom(0x21,2); // 0x21 adresse de la carte a puce
   Wire.write(0x01);
+   for (int i = 1;i<5;i++){
+     Serial.print(*(valCode+i));
+   }
   for (int i = 0;i<5;i++){
      *(code+i)=static_cast<char>(*(valCode+1+i));
    }
+  
   delete [] valCode;
 }
 
 int validationCode(const char* const code,const char* const codeEEPROM){
- if (*code == '3' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' || *code == '1' && *(code+1) == '2' && *(code+2)== '3' && *(code+3)=='4' || *(code)== *(codeEEPROM) && *(code+1) == *(codeEEPROM+1) && *(code+2) == *(codeEEPROM+2)&& *(code+3) == *(codeEEPROM+3))
-{
+ if ((*code == '6' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' )|| (*code == '1' && *(code+1) == '2' && *(code+2)== '3' && *(code+3)=='4' )/*|| (*(code)== *(codeEEPROM) && *(code+1) == *(codeEEPROM+1) && *(code+2) == *(codeEEPROM+2)&& *(code+3) == *(codeEEPROM+3*/){
      return 1;
   }else{
      return 0;
@@ -329,7 +340,7 @@ void getCodeEEPROM(char* codeEEPROM){
   byte* valCode(NULL);
   valCode = new byte [4]; 
   Wire.beginTransmission(0x57);
-  Wire.requestFrom(0x57,4,true); // 0x57 adresse de l'EPROM I2C de la memoire
+  Wire.requestFrom(0x57,4,true); // 0x57 adresse de l'EEPROM I2C de la memoire
   *(valCode)=Wire.read();
   *(valCode+1)=Wire.read();
   *(valCode+2)=Wire.read();
@@ -349,3 +360,44 @@ void getCodeEEPROM(char* codeEEPROM){
   delete [] valCode;
 }
 
+void gardien(int nbVoiture){
+  static int essai=0;
+  if (nbVoiture == 0 && essai <= 6){
+    char c;
+    Serial.print("Voulez-vous entrer des codes valides (Y : yes) :");
+    delay(300);
+    while (Serial.available()) { // tant que des caractères sont en attente d'être lus
+      c = Serial.read(); // on lit le charactère
+      Serial.println(c);
+      delay(10); // petit temps de pause
+    }
+    if (c == 'Y' || c == 'y'){
+      //entrerCodeGardien(code);
+      essai=7;
+    }  
+   essai++;  
+   delay(2000);
+  }
+  Serial.print("Le nombre de Voiture presente dans le parking est:");
+  Serial.println(nbVoiture);
+
+
+}
+
+ void entrerCodeGardien(char* const code){
+  int i=0;
+  Serial.println("Ecrire un code Valide");
+  delay(300);
+  while (Serial.available()|| i<TAILLECODE) { // tant que des caractères sont en attente d'être lus
+    char c = Serial.read(); // on lit le charactère
+    *(code+i)=c;
+    delay(10); // petit temps de pause
+    i++;
+  }
+  Serial.print("Le code est :");
+  for (int i=0;i<TAILLECODE;i++){
+    Serial.print(*(code+i));
+  }
+  Serial.println(" ");
+  delay(2000);
+ }
