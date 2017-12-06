@@ -1,5 +1,3 @@
-#include <Wire.h>
-#include "I2C.h"
 #include "Clavier.h"
 
 #define TAILLECODE 4
@@ -21,8 +19,6 @@ void loop() {
      touchedetecter=detectionTouche();
      if (touchedetecter==1){
        *(code+i)=conversionTouche();
-     //  Serial.print("La touche appuyer est : ");
-     //  Serial.println(*(code+i));
        i++;
      }
      delay(200);

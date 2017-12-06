@@ -1,21 +1,22 @@
 #include "Clavier.h"
 
 int detectionTouche(void){
-  int val=0;
-  int detect=0;
+  int val=0;    //initialisation d'un variable "val" a 0
+  int detect=0; //initialisation d'un variable "detect" a 0 qui permettra de savoir si la touche est detectee
+                //Nous avons une touche detectee lorsque la valeur passe a 1
   
-  Wire.beginTransmission(0x22);
-  Wire.write(0x0F);
-  Wire.endTransmission();
-  Wire.requestFrom(0x22,1);
-  val=Wire.read();
-  if (val!=15){
-    detect++;
+  Wire.beginTransmission(0x22); 
+  Wire.write(0x0F);       // Ecriture sur le clavier de la valeur 0F en hexa pour permettre de savoir si elle change
+  Wire.endTransmission(); 
+  Wire.requestFrom(0x22,1); // Permet de dire au clavier que l'on va lire sa valeur
+  val=Wire.read();          // Recuperer les informations du clavier 
+  if (val!=15){   //Si la valeur recuperee est differente de 0x0F en decimal soit (15)10 
+    detect++;     
   }
-  return detect;
+  return detect;  
 }
 
-char conversionTouche(void){
+char conversionTouche(void){ 
   int valColonne=0;
   int valLigne=0;
   char valeur=' ';
