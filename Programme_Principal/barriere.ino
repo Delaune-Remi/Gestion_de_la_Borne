@@ -111,7 +111,7 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    effacerAfficheur(0x3B);
    envoyerMessage(0x3B,MESSAGE2,LIGNE1);
    envoyerMessage(0x3B,"ou une Carte",LIGNE2);
-   for(int i=0; i<=2000 && toucheDetecter != 1 && ((carte & 0x01) == 1 || i<2 ) ; i++){
+   for(int i=0; i<=20000 && toucheDetecter != 1 && ((carte & 0x01) == 1 || i<2 ) ; i++){
         toucheDetecter=detectionTouche();
         detecterCarte(carte);     // Appel d'une fonction qui detecte une carte
     }
@@ -320,7 +320,7 @@ void lectureCodeCarte(char* code){
 }
 
 int validationCode(const char* const code,const char* const codeEEPROM){
- if ((*code == '6' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' )|| (*code == '1' && *(code+1) == '2' && *(code+2)== '3' && *(code+3)=='4' )/*|| (*(code)== *(codeEEPROM) && *(code+1) == *(codeEEPROM+1) && *(code+2) == *(codeEEPROM+2)&& *(code+3) == *(codeEEPROM+3*/){
+ if ((*code == '3' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' )|| (*code == '1' && *(code+1) == '2' && *(code+2)== '3' && *(code+3)=='4' )/*|| (*(code)== *(codeEEPROM) && *(code+1) == *(codeEEPROM+1) && *(code+2) == *(codeEEPROM+2)&& *(code+3) == *(codeEEPROM+3*/){
      return 1;
   }else{
      return 0;
