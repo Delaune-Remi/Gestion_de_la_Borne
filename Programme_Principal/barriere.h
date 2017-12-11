@@ -4,6 +4,7 @@
 #include <Wire.h>   // Inclusion de la librairie pour les Liaison Series
 #include "I2C.h"    // Inclusion de la librairie permettant d'initialiser le bus I2C 
 #include "affiche.h"
+#include "Clavier.h"
 
 void ouvertureBarriereEntrer(int&);
 
@@ -110,17 +111,6 @@ void entrerVehicule(int&,int&,int&);
  * Elle ne renvoie rien.
  */
 
-void lectureClavier (char*);
-
-/*
- * Fonction permettant de lire le code entrer sur le clavier.
- * 
- * La fonction a pour parametre d'entrer:
- *  - L'espace memoire reserve au code
- * 
- * Elle ne renvoie rien
- */
-
 void lectureCodeCarte(char*);
 
 /*
@@ -139,36 +129,13 @@ int validationCode(const char* const,const char* const );
  * 
  * La fonction a pour parametre d'entrer: 
  *  - L'espace memoire reserve au code
- *  -L'espace memoire reserve au code EEPROM
+ *  - L'espace memoire reserve au code EEPROM
  *  
  *  Elle renvoie une valeur qui est :
  *    - 0 : code non valide
  *    - 1 : code valide
  */
 
-int detectionTouche(void);
- 
- /*
-  * Fonction permettant de detecter si une touche est appuyer.
-  * 
-  * La fonction n'a pas de parametre d'entrer.
-  * 
-  * Elle renvoie une variable de type entier:
-  *   - 0 :  touche non detecter
-  *   - 1 :  touche detecter
-  * 
-  */
-
-char conversionTouche(void);
-
- /*
-  * Fonction permettant de convertir la touche est appuyer en caractere.
-  * 
-  * La fonction n'a pas de parametre d'entrer.
-  * 
-  * Elle renvoie une variable de type caractere qui contient le caractere correspond a la touche appuyer.
-  * 
-  */
 
 void setCodeEEPROM (void);
 

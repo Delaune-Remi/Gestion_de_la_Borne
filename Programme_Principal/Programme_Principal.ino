@@ -9,7 +9,6 @@ void setup() {
   initAfficheur(0x3B);
   effacerAfficheur(0x3B);
   Serial.begin(9600); // initialisation de la vitesse de la liaison serie a 9600 bauds
-  //setCodeEEPROM();
 }
 
 void loop() {
@@ -18,6 +17,7 @@ void loop() {
    Serial.print("Nb Voiture: ");  // Affiche sur le moniteur Serie le texte "Nb Voiture: "
    Serial.println(nbVoiture);     // Affiche le nombre de voiture
    Wire.beginTransmission(0x20);  // Initialisation de la transmission du bus I2C pour le capteur des boucles qui est a l'adresse 0x20
+   digitalWrite(38,LOW);
    lireBoucleAval(boucleAval);    // Appel d'une fonction qui lit l'etat de la boucle Aval
    lireBoucleAmont(boucleAmont);  // Appel d'une fonction qui lit l'etat de la boucle Amont
    effacerAfficheur(0x3B);
