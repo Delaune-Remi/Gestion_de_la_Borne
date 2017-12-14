@@ -26,9 +26,10 @@ void ouvertureBarriereEntrer (int& nbVehicule){
           lireBoucleAval(boucleAval);
           lireBoucleAmont(boucleAmont);
         }
-        nbVehicule++;
+        nbVehicule+=1;
+        ecritureVoitureEEPROM(nbVehicule);
         Serial.print("Nb Voiture: ");
-        Serial.println(nbVehicule);
+        Serial.println(lectureVoitureEEPROM());
       }  
   }
   effacerAfficheur(0x3B);
@@ -82,18 +83,12 @@ void sortieVehicule (int& nbVoiture,int& boucleAmont,int& boucleAval){
           lireBoucleAval(boucleAval);
           lireBoucleAmont(boucleAmont);
         }while ( boucleAmont == 0 || boucleAval == 0);  //tant qu'il y a un vehicule sur la boucle amont ou sur la boucle aval on ne fait rien
-        nbVoiture--; // decrementation du nombre de voiture
+        ecritureVoitureEEPROM(--nbVoiture); // decrementation du nombre de voiture
      }
     effacerAfficheur(0x3B);
     setEclairage(0x21,HIGH);
     envoyerMessage(0x3B,MESSAGE5,LIGNE1);
     fermerBarriere ();  // Fonction permettant de fermer la barriere
-}
-
-void detecterCarte (int& carte){
-  Wire.beginTransmission(0x21);   // Initialisation de la transmission du bus I2C pour le capteur de carte a puce qui est a l'adresse 0x21
-  Wire.requestFrom (0x21,2);
-  carte=Wire.read();
 }
 
 void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
@@ -105,15 +100,15 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    code = new char [TAILLECODE+1];
    char* codeEEPROM (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
    codeEEPROM = new char [TAILLECODE];
-   getCodeEEPROM(codeEEPROM);
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
    delay(2000);
    effacerAfficheur(0x3B);
    envoyerMessage(0x3B,MESSAGE2,LIGNE1);
    envoyerMessage(0x3B,"ou une Carte",LIGNE2);
-   for(int i=0; i<=20000 && toucheDetecter != 1 && ((carte & 0x01) == 1 || i<2 ) ; i++){
+   for(int i=0; i<=20000 && toucheDetecter != 1 && ((carte & 0x01) == 1 || i<2 ) && boucleAmont == 0 ; i++){
         toucheDetecter=detectionTouche();
         detecterCarte(carte);     // Appel d'une fonction qui detecte une carte
+        lireBoucleAmont(boucleAmont);
     }
    if ((carte & 0x01) == 0){ // Condition permettant de verifier si il y a une carte a puce de detecter
       effacerAfficheur(0x3B);
@@ -167,96 +162,57 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
   effacerAfficheur(0x3B);
 }
 
-void lectureCodeCarte(char* code){
-  byte* valCode(NULL);
-  valCode = new byte [5];
-  
-  Wire.beginTransmission(0x21);
-  Wire.requestFrom(0x21,2); // 0x21 adresse de la carte a puce
-  Wire.write(0x02);
-  Wire.endTransmission();
-  Wire.beginTransmission(0x50);
-  Wire.requestFrom(0x50,5,true); // 0x50 adresse de l'EPROM I2C de la carte a puce
-  setEclairage(0x21,HIGH);
-  *valCode=Wire.read();
-  *(valCode+1)=Wire.read();
-  envoyerMessage(0x3B,"       *",LIGNE2);
-  *(valCode+2)=Wire.read();
-  envoyerMessage(0x3B,"      **",LIGNE2);
-  *(valCode+3)=Wire.read();
-  envoyerMessage(0x3B,"      ***",LIGNE2);
-  *(valCode+4)=Wire.read();
-  envoyerMessage(0x3B,"     ****",LIGNE2);
-  effacerAfficheur(0x3B);
-  Wire.endTransmission();
-  Wire.beginTransmission(0x21);
-  Wire.write(0x01);
-   for (int i = 1;i<5;i++){
-     Serial.print(*(valCode+i));
-   }
-  for (int i = 0;i<5;i++){
-     *(code+i)=static_cast<char>(*(valCode+1+i));
-   }
-  
-  delete [] valCode;
-}
 
-int validationCode(const char* const code,const char* const codeEEPROM){
- if ((*code == '3' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' )|| (*code == '1' && *(code+1) == '2' && *(code+2)== '3' && *(code+3)=='4' )/*|| (*(code)== *(codeEEPROM) && *(code+1) == *(codeEEPROM+1) && *(code+2) == *(codeEEPROM+2)&& *(code+3) == *(codeEEPROM+3*/){
+
+int validationCode(const char* const code, char* const codeEEPROM){
+  int maxCode,i;
+  lectureCodesEEPROM(codeEEPROM,maxCode);
+ if ((*code == '3' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' )){
      return 1;
-  }else{
-     return 0;
+  }else {
+      for (i = 0; *(code)!= *(codeEEPROM+i) && *(code+1) != *(codeEEPROM+1+i) && *(code+2) != *(codeEEPROM+2+i) && *(code+3) != *(codeEEPROM+3+i) &&(i<(maxCode-3));i+=4){
+ 
+      }
+      if (*(code)== *(codeEEPROM+i) && *(code+1) == *(codeEEPROM+1+i) && *(code+2) == *(codeEEPROM+2+i) && *(code+3) == *(codeEEPROM+3+i) ){
+        Serial.print("Code EEPROM : ");
+        for (int i=0;i<5;i++){
+          Serial.print(*(code+i));
+        }
+        Serial.println();
+        return 1;
+      }else{
+        Serial.print("Code Clavier : ");
+        for (int i=0;i<5;i++){
+          Serial.print(*(code+i));
+        }
+        Serial.println();
+        Serial.print("Code EEPROM : ");
+        for (int i=0;i<5;i++){
+          Serial.print(*(codeEEPROM+i));
+        }
+        Serial.println();
+        return 0;
+      }
   }
-}
-
-void setCodeEEPROM(void){
-  Wire.beginTransmission(0x57);
-  Wire.write(31);
-  Wire.write(32);
-  Wire.write(33);
-  Wire.write(34);
-  Wire.endTransmission();
-}
-
-void getCodeEEPROM(char* codeEEPROM){
-  byte* valCode(NULL);
-  valCode = new byte [4]; 
-  Wire.beginTransmission(0x57);
-  Wire.requestFrom(0x57,4,true); // 0x57 adresse de l'EEPROM I2C de la memoire
-  *(valCode)=Wire.read();
-  *(valCode+1)=Wire.read();
-  *(valCode+2)=Wire.read();
-  *(valCode+3)=Wire.read();
-  Wire.endTransmission();
- /* Serial.println("Code EEPROM:");
-  for (int i = 0;i<4;i++){
-     Serial.print(*(valCode+i));
-   }
-  Serial.println(" ");*/
-  Serial.println("Code EEPROM:");
-  for (int i = 0;i<4;i++){
-     *(codeEEPROM+i)=static_cast<char>(*(valCode+i));
-     Serial.print(*(codeEEPROM+i));
-   }
-  Serial.println(" ");
-  delete [] valCode;
 }
 
 void gardien(int nbVoiture){
   static int essai=0;
-  if (nbVoiture == 0 && essai <= 6){
+  if ( essai <= 6){
     char c;
-    Serial.print("Voulez-vous entrer des codes valides (Y : yes) :");
+    Serial.print("Voulez-vous entrer des codes valides (Y : yes,N : no) :");
     delay(300);
     while (Serial.available()) { // tant que des caractères sont en attente d'être lus
       c = Serial.read(); // on lit le charactère
       Serial.println(c);
       delay(10); // petit temps de pause
     }
-    if (c == 'Y' || c == 'y'){
-      //entrerCodeGardien(code);
+    if (c == 'Y'){
+      entrerCodeGardien();
       essai=7;
-    }  
+    }else if (c == 'N'){
+      essai=7;
+    }
    essai++;  
    delay(2000);
   }
@@ -266,19 +222,15 @@ void gardien(int nbVoiture){
 
 }
 
- void entrerCodeGardien(char* const code){
+ void entrerCodeGardien(void){
   int i=0;
   Serial.println("Ecrire un code Valide");
   delay(300);
   while (Serial.available()|| i<TAILLECODE) { // tant que des caractères sont en attente d'être lus
     char c = Serial.read(); // on lit le charactère
-    *(code+i)=c;
+    ecritureCodesEEPROM(c,i);
     delay(10); // petit temps de pause
     i++;
-  }
-  Serial.print("Le code est :");
-  for (int i=0;i<TAILLECODE;i++){
-    Serial.print(*(code+i));
   }
   Serial.println(" ");
   delay(2000);

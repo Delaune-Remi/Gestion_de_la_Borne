@@ -13,7 +13,7 @@ void setup() {
 
 void loop() {
 
-   static int nbVoiture=0;  // initialisation du nombre de voiture a 0
+   static int nbVoiture=lectureVoitureEEPROM();  // initialisation du nombre de voiture a 0
    Serial.print("Nb Voiture: ");  // Affiche sur le moniteur Serie le texte "Nb Voiture: "
    Serial.println(nbVoiture);     // Affiche le nombre de voiture
    Wire.beginTransmission(0x20);  // Initialisation de la transmission du bus I2C pour le capteur des boucles qui est a l'adresse 0x20
