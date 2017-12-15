@@ -1,6 +1,6 @@
 #include "barriere.h"
 
-#define TAILLECODE 4
+#define tailleCodeEEPROM (lectureCodeMaxEEPROM())-3
 
 
 void ouvertureBarriereEntrer (int& nbVehicule){
@@ -99,7 +99,7 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
    char* code (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
    code = new char [TAILLECODE+1];
    char* codeEEPROM (NULL);    // Initialisation d'un pointeur sur caractere qui vas contenir le code a NULL
-   codeEEPROM = new char [TAILLECODE];
+   codeEEPROM = new char [tailleCodeEEPROM];
    int carte;        // Declaration d'une variable de type entier qui permettera de detecter si il y a une carte d'inserer
    delay(2000);
    effacerAfficheur(0x3B);
@@ -165,73 +165,45 @@ void entrerVehicule (int& nbVoiture,int& boucleAmont, int& boucleAval){
 
 
 int validationCode(const char* const code, char* const codeEEPROM){
-  int maxCode,i;
+  int maxCode,i=0;
+  int j=0;
   lectureCodesEEPROM(codeEEPROM,maxCode);
- if ((*code == '3' && *(code+1) == '4' && *(code+2)== '5' && *(code+3)=='6' )){
-     return 1;
-  }else {
-      for (i = 0; *(code)!= *(codeEEPROM+i) && *(code+1) != *(codeEEPROM+1+i) && *(code+2) != *(codeEEPROM+2+i) && *(code+3) != *(codeEEPROM+3+i) &&(i<(maxCode-3));i+=4){
+  for (i = 0; *(code)!= *(codeEEPROM+i) && *(code+1) != *(codeEEPROM+1+i) && *(code+2) != *(codeEEPROM+2+i) && *(code+3) != *(codeEEPROM+3+i) && (i<(maxCode-3));i+=4){
  
-      }
-      if (*(code)== *(codeEEPROM+i) && *(code+1) == *(codeEEPROM+1+i) && *(code+2) == *(codeEEPROM+2+i) && *(code+3) == *(codeEEPROM+3+i) ){
-        Serial.print("Code EEPROM : ");
-        for (int i=0;i<5;i++){
-          Serial.print(*(code+i));
-        }
-        Serial.println();
-        return 1;
-      }else{
-        Serial.print("Code Clavier : ");
-        for (int i=0;i<5;i++){
-          Serial.print(*(code+i));
-        }
-        Serial.println();
-        Serial.print("Code EEPROM : ");
-        for (int i=0;i<5;i++){
-          Serial.print(*(codeEEPROM+i));
-        }
-        Serial.println();
-        return 0;
-      }
+  }
+  if (*(code)== *(codeEEPROM+i) && *(code+1) == *(codeEEPROM+1+i) && *(code+2) == *(codeEEPROM+2+i) && *(code+3) == *(codeEEPROM+3+i) ){
+     Serial.print("Code Clavier : ");
+     do{
+        Serial.print(*(code+j));
+        j++;
+     }while(j<i);
+     Serial.println();
+     Serial.print("Code EEPROM : ");
+     j=0;
+     do{
+        Serial.print(*((codeEEPROM+i)-(5+j)));
+        j++;
+     }while(j<i);
+     Serial.println();
+     effacerAfficheur(0x3B);
+     envoyerMessage(0x3B,MESSAGE3,LIGNE1);
+     return 1;
+  }else{
+     Serial.print("Code Clavier : ");
+     for (int i=0;i<5;i++){
+        Serial.print(*(code+i));
+     }
+     Serial.println();
+     Serial.print("Code EEPROM : ");
+     for (int i=0;i<5;i++){
+        Serial.print(*(codeEEPROM+i));
+     }
+     Serial.println();
+     
+     effacerAfficheur(0x3B);
+     envoyerMessage(0x3B,MESSAGE9,LIGNE1);
+     delay(2000);
+     return 0;
   }
 }
 
-void gardien(int nbVoiture){
-  static int essai=0;
-  if ( essai <= 6){
-    char c;
-    Serial.print("Voulez-vous entrer des codes valides (Y : yes,N : no) :");
-    delay(300);
-    while (Serial.available()) { // tant que des caractères sont en attente d'être lus
-      c = Serial.read(); // on lit le charactère
-      Serial.println(c);
-      delay(10); // petit temps de pause
-    }
-    if (c == 'Y'){
-      entrerCodeGardien();
-      essai=7;
-    }else if (c == 'N'){
-      essai=7;
-    }
-   essai++;  
-   delay(2000);
-  }
-  Serial.print("Le nombre de Voiture presente dans le parking est:");
-  Serial.println(nbVoiture);
-
-
-}
-
- void entrerCodeGardien(void){
-  int i=0;
-  Serial.println("Ecrire un code Valide");
-  delay(300);
-  while (Serial.available()|| i<TAILLECODE) { // tant que des caractères sont en attente d'être lus
-    char c = Serial.read(); // on lit le charactère
-    ecritureCodesEEPROM(c,i);
-    delay(10); // petit temps de pause
-    i++;
-  }
-  Serial.println(" ");
-  delay(2000);
- }

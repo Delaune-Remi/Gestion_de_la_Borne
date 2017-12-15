@@ -114,28 +114,5 @@ int validationCode(const char* const,const char* const );
  *    - 1 : code valide
  */
 
-void gardien(int);
-
-/*
- * Fonction permettant d'afficher au moniteur serie du gardien le nombre de voiture presente dans le parking et mettre des code qui seront valides. 
- * 
- * La fonction a pour parametre d'entrer:
- *  - le nombre de voiture presente dans le parking
- *  
- * Elle ne renvoie rien.
- * 
- */
-
- void entrerCodeGardien(char* const );
-
-/*
- * Fonction permettant d'afficher au moniteur serie du gardien le nombre de voiture presente dans le parking et mettre des code qui seront valides. 
- * 
- * La fonction a pour parametre d'entrer:
- *  - l'espace memoire reserver pour le code
- *  
- * Elle ne renvoie rien.
- * 
- */
 #endif
 

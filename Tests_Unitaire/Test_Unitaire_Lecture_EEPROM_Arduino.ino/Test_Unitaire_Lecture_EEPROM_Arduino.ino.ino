@@ -23,6 +23,5 @@ void loop() {
   if (address == EEPROM.length()){  // si l'adresse est egal a la longueur de l'EEPROM
     address = 0; //affectation de l'adresse a 0
   }
-  
   delay(500); // attente de 500 ms
 }

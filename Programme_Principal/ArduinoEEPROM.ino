@@ -21,7 +21,7 @@ int lectureCodeMaxEEPROM(void){
   int maxcode;
 
    maxcode = EEPROM.read(2);
-  
+  Serial.println(maxcode);
   return maxcode;
 }
 
