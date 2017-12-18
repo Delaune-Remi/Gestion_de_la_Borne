@@ -26,7 +26,7 @@ int lectureCodeMaxEEPROM(void){
 }
 
 void ecritureCodesEEPROM(char caractere,int i){ 
-   EEPROM.write(lectureCodeMaxEEPROM()+i,caractere);
+   EEPROM.write((lectureCodeMaxEEPROM()+i),caractere);
 }
 
 void lectureCodesEEPROM(char* const codes,int& maxCode){

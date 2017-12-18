@@ -30,9 +30,6 @@ void lectureCodeCarte(char* code){
   Wire.endTransmission();
   Wire.beginTransmission(0x21);
   Wire.write(0x01);
-  /* for (int i = 1;i<5;i++){
-     Serial.print(*(valCode+i));
-   }*/
   for (int i = 0;i<5;i++){
      *(code+i)=static_cast<char>(*(valCode+1+i));
    }

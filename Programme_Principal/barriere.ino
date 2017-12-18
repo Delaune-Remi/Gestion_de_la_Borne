@@ -172,34 +172,10 @@ int validationCode(const char* const code, char* const codeEEPROM){
  
   }
   if (*(code)== *(codeEEPROM+i) && *(code+1) == *(codeEEPROM+1+i) && *(code+2) == *(codeEEPROM+2+i) && *(code+3) == *(codeEEPROM+3+i) ){
-     Serial.print("Code Clavier : ");
-     do{
-        Serial.print(*(code+j));
-        j++;
-     }while(j<i);
-     Serial.println();
-     Serial.print("Code EEPROM : ");
-     j=0;
-     do{
-        Serial.print(*((codeEEPROM+i)-(5+j)));
-        j++;
-     }while(j<i);
-     Serial.println();
      effacerAfficheur(0x3B);
      envoyerMessage(0x3B,MESSAGE3,LIGNE1);
      return 1;
   }else{
-     Serial.print("Code Clavier : ");
-     for (int i=0;i<5;i++){
-        Serial.print(*(code+i));
-     }
-     Serial.println();
-     Serial.print("Code EEPROM : ");
-     for (int i=0;i<5;i++){
-        Serial.print(*(codeEEPROM+i));
-     }
-     Serial.println();
-     
      effacerAfficheur(0x3B);
      envoyerMessage(0x3B,MESSAGE9,LIGNE1);
      delay(2000);
